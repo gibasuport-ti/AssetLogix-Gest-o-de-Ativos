@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "operator"] }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Asset": {
+      "title": "Asset",
+      "description": "Logistics asset information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tag": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "serialNumber": { "type": "string" },
+        "defaultSapCode": { "type": "string" },
+        "defaultNcm": { "type": "string" },
+        "defaultUnitValue": { "type": "number" },
+        "defaultNfeReference": { "type": "string" }
+      },
+      "required": ["id", "tag", "name"]
+    },
+    "TransportRequest": {
+      "title": "TransportRequest",
+      "description": "Logistics transport request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "assetIds": { "type": "array", "items": { "type": "string" } },
+        "requestAssets": { "type": "array" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "logisticsStatus": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "collectionDate": { "type": "number" },
+        "deliveryDate": { "type": "number" },
+        "originDetails": { "type": "object" },
+        "destinationDetails": { "type": "object" },
+        "method": { "type": "string" },
+        "requesterEmail": { "type": "string" },
+        "totalWeight": { "type": "string" },
+        "totalVolume": { "type": "number" },
+        "trackingNumber": { "type": "string" },
+        "emailDraft": { "type": "string" },
+        "logisticsDraft": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "invoiceDate": { "type": "number" },
+        "invoiceFileName": { "type": "string" },
+        "invoiceFileUrl": { "type": "string" }
+      },
+      "required": ["id", "assetIds", "status", "createdAt", "requesterEmail"]
+    }
+  },
+  "firestore": {
+    "/assets/{assetId}": {
+      "schema": "Asset",
+      "description": "Collection of assets"
+    },
+    "/requests/{requestId}": {
+      "schema": "TransportRequest",
+      "description": "Collection of transport requests"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profiles and roles"
+    }
+  }
+}
