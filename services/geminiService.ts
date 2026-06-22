@@ -46,7 +46,7 @@ const generateSAPTemplate = (greeting: string, origin: string, destination: stri
       <p>${greeting} Tiago,</p>
       <p>Segue solicitação de NF Remessa conforme dados abaixo:</p>
       
-      <table style="border: 1px solid #3b82f6; border-collapse: collapse; width: 100%; margin: 20px 0;">
+      <table class="original-template-table" style="border: 1px solid #3b82f6; border-collapse: collapse; width: 100%; margin: 20px 0;">
         <tr>
           <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; background-color: #f0f7ff; width: 150px;">Solicitante</td>
           <td style="padding: 10px; border: 1px solid #ddd;">${requesterEmail || 'N/D'}</td>
@@ -73,7 +73,7 @@ const generateSAPTemplate = (greeting: string, origin: string, destination: stri
         </tr>
       </table>
 
-      <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
+      <table class="original-template-table" style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
         <thead style="background-color: #9dbadb;">
           <tr>
             <th style="border: 1px solid #000; padding: 5px; font-size: 11px;">Item</th>
@@ -187,9 +187,6 @@ const generatePHLTemplate = (request: TransportRequest, assets: Asset[]) => {
 
     // CEP
     if (details.cep) parts.push(`CEP: ${details.cep}`);
-
-    // A/C de
-    if (details.attentionTo) parts.push(`A/C de: ${details.attentionTo}`);
     
     return parts.join(', ');
   };
@@ -201,7 +198,7 @@ const generatePHLTemplate = (request: TransportRequest, assets: Asset[]) => {
   return `
     <div style="font-family: Arial, sans-serif; color: #000; background-color: #fff; padding: 20px;">
       
-      <table style="border: 1px solid #000; border-collapse: collapse; width: 100%; max-width: 800px; font-size: 12px;">
+      <table class="original-template-table" style="border: 1px solid #000; border-collapse: collapse; width: 100%; max-width: 800px; font-size: 12px;">
          <tr>
             <td style="border: 1px solid #000; background-color: #ffff00; font-weight: bold; padding: 8px; width: 25%;">SO</td>
             <td style="border: 1px solid #000; padding: 8px;">CENTRO DE CUSTO J639I016</td>
@@ -220,7 +217,7 @@ const generatePHLTemplate = (request: TransportRequest, assets: Asset[]) => {
          </tr>
          <tr>
             <td style="border: 1px solid #000; background-color: #ffff00; font-weight: bold; padding: 8px;">Contato de Coleta</td>
-            <td style="border: 1px solid #000; padding: 8px;">${origin.attentionTo ? `${origin.attentionTo} (${requesterContact})` : requesterContact}</td>
+            <td style="border: 1px solid #000; padding: 8px;">${origin.attentionTo || 'N/D'}</td>
          </tr>
          <tr>
             <td style="border: 1px solid #000; background-color: #ffff00; font-weight: bold; padding: 8px;">Tel./Cel./Ramal</td>
@@ -232,7 +229,7 @@ const generatePHLTemplate = (request: TransportRequest, assets: Asset[]) => {
          </tr>
          <tr>
             <td style="border: 1px solid #000; background-color: #ffff00; font-weight: bold; padding: 8px;">Contato de Entrega</td>
-            <td style="border: 1px solid #000; padding: 8px;">${destination.attentionTo ? destination.attentionTo : 'Recebimento / Expedição'}</td>
+            <td style="border: 1px solid #000; padding: 8px;">${destination.attentionTo || 'N/D'}</td>
          </tr>
          <tr>
             <td style="border: 1px solid #000; background-color: #ffff00; font-weight: bold; padding: 8px;">Obs. de Entrega</td>
@@ -266,7 +263,7 @@ const generateLogisticsFallback = (request: TransportRequest, itemsList: string,
       <p>Prezados,</p>
       <p>Solicitamos a ${isCarrier ? 'coleta' : 'postagem'} da encomenda conforme dados abaixo:</p>
       
-      <table style="border: 1px solid #ccc; border-collapse: collapse; width: 100%; margin: 20px 0;">
+      <table class="original-template-table" style="border: 1px solid #ccc; border-collapse: collapse; width: 100%; margin: 20px 0;">
         <tr style="background-color: #f9f9f9;">
           <td style="padding: 8px; border: 1px solid #ccc; font-weight: bold;">Protocolo</td>
           <td style="padding: 8px; border: 1px solid #ccc;">${request.id}</td>

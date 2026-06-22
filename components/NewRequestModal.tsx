@@ -59,6 +59,10 @@ const AddressSection = React.memo(({
           <label className={labelClass}>Estado <span className="text-rose-500">*</span></label>
           <input id={`${theme}-state`} className={fieldClass} value={data.state} onChange={e => onChange('state', e.target.value)} placeholder="Ex: SP" />
         </div>
+        <div>
+          <label className={labelClass}>Centro / Plant <span className="text-rose-500">*</span></label>
+          <input id={`${theme}-plant`} className={fieldClass} value={data.plant || ''} onChange={e => onChange('plant', e.target.value)} placeholder="Ex: 978G" />
+        </div>
         <div className="col-span-2">
           <label className={labelClass}>Cidade <span className="text-rose-500">*</span></label>
           <input id={`${theme}-city`} className={fieldClass} value={data.city} onChange={e => onChange('city', e.target.value)} placeholder="Ex: São Paulo" />
@@ -71,7 +75,7 @@ const AddressSection = React.memo(({
           <label className={labelClass}>Endereço Completo <span className="text-rose-500">*</span></label>
           <input id={`${theme}-address`} className={fieldClass} value={data.address} onChange={e => onChange('address', e.target.value)} placeholder="Logradouro, número, complemento..." />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-4">
           <label className={labelClass}>A/C de (Aos cuidados de) <span className="text-rose-500">*</span></label>
           <input id={`${theme}-attentionTo`} className={fieldClass} value={data.attentionTo || ''} onChange={e => onChange('attentionTo', e.target.value)} placeholder="Destinatário / Contato" />
         </div>
@@ -277,6 +281,11 @@ const NewRequestModal: React.FC<Props> = ({ assets, onClose, onSubmit, userRole,
       setTimeout(() => document.getElementById('green-state')?.focus(), 50);
       return;
     }
+    if (!origin.plant || !origin.plant.trim()) {
+      alert("Por favor, preencha o campo Centro / Plant de Origem.");
+      setTimeout(() => document.getElementById('green-plant')?.focus(), 50);
+      return;
+    }
     if (!origin.city || !origin.city.trim()) {
       alert("Por favor, preencha a Cidade da Origem.");
       setTimeout(() => document.getElementById('green-city')?.focus(), 50);
@@ -314,6 +323,11 @@ const NewRequestModal: React.FC<Props> = ({ assets, onClose, onSubmit, userRole,
       setTimeout(() => document.getElementById('blue-state')?.focus(), 50);
       return;
     }
+    if (!destination.plant || !destination.plant.trim()) {
+      alert("Por favor, preencha o campo Centro / Plant de Destino.");
+      setTimeout(() => document.getElementById('blue-plant')?.focus(), 50);
+      return;
+    }
     if (!destination.city || !destination.city.trim()) {
       alert("Por favor, preencha a Cidade do Destino.");
       setTimeout(() => document.getElementById('blue-city')?.focus(), 50);
@@ -336,10 +350,39 @@ const NewRequestModal: React.FC<Props> = ({ assets, onClose, onSubmit, userRole,
     }
 
     // Validation: Peso Total
-    if (!totalWeight || !totalWeight.trim()) {
-      alert("Por favor, preencha o campo Peso Total.");
+    const parsedWeightNum = totalWeight ? parseFloat(totalWeight.replace(/[^\d.,]/g, '').replace(',', '.')) : 0;
+    if (!totalWeight || !totalWeight.trim() || totalWeight === '0kg' || totalWeight === '0' || parsedWeightNum <= 0) {
+      alert("Por favor, preencha um Peso Total válido e maior que zero (Ex: 2kg).");
       setTimeout(() => document.getElementById('total-weight')?.focus(), 50);
       return;
+    }
+
+    // Validation: Itens da Nota Fiscal e Detalhamento SAP
+    for (let i = 0; i < selectedAssets.length; i++) {
+      const sa = selectedAssets[i];
+      const asset = assets.find(a => a.id === sa.assetId);
+      const assetName = asset ? asset.name : `Item ${i+1}`;
+      
+      if (!sa.sapCode || !sa.sapCode.trim()) {
+        alert(`Por favor, preencha o campo Cód. SAP Fiori para o item "${assetName}".`);
+        return;
+      }
+      if (!sa.ncm || !sa.ncm.trim() || sa.ncm.trim() === '0') {
+        alert(`Por favor, preencha o campo NCM para o item "${assetName}" com um valor válido.`);
+        return;
+      }
+      if (!sa.nfeReference || !sa.nfeReference.trim()) {
+        alert(`Por favor, preencha a NFe Ref. (NFe de Origem) para o item "${assetName}". Caso não possua, digite "Sem nota de origem".`);
+        return;
+      }
+      if (sa.unitValue <= 0) {
+        alert(`Por favor, insira um Valor Unitário maior que R$ 0,00 para o item "${assetName}".`);
+        return;
+      }
+      if (!sa.quantity || sa.quantity <= 0) {
+        alert(`Por favor, insira uma Quantidade válida e maior que zero para o item "${assetName}".`);
+        return;
+      }
     }
 
     try {

@@ -1,0 +1,53 @@
+# Workflow simples para compilar e implantar o projeto React/Vite no GitHub Pages
+name: Implante de conteúdo estático no GitHub Pages
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+# Define as permissões do GITHUB_TOKEN para permitir implantação no GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permite apenas uma implantação simultânea, cancelando as pendentes mais antigas
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código-Fonte
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar Dependências
+        run: npm install
+
+      - name: Compilar Aplicação (Build)
+        run: npm run build
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload do Artefato de Build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Define a pasta das páginas geradas pelo Vite
+          path: './dist'
+
+      - name: Implantar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
