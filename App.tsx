@@ -450,7 +450,7 @@ const App: React.FC = () => {
              </div>
              <button 
               onClick={() => setIsModalOpen(true)}
-              className="hidden md:flex bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-xl shadow-blue-600/20 transition-all active:scale-95 items-center gap-2"
+              className="flex bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 md:py-3 md:px-8 rounded-xl shadow-md md:shadow-xl shadow-blue-600/20 transition-all active:scale-95 items-center gap-2 text-xs md:text-sm"
             >
               <i className="fas fa-plus"></i> Novo
             </button>

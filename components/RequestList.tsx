@@ -655,7 +655,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
               <th className="px-6 md:px-10 py-5">Fluxo</th>
               <th className="px-6 md:px-10 py-5">Logística Física</th>
               <th className="px-6 md:px-10 py-5">Status SAP</th>
-              <th className="px-6 md:px-10 py-5 text-right">Ações</th>
+              <th className="px-6 md:px-10 py-5 text-right min-w-[240px] md:min-w-[320px]">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700 text-sm transition-colors">
@@ -738,12 +738,12 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                     )}
                   </div>
                 </td>
-                <td className="px-6 md:px-10 py-6 md:py-8 text-right">
+                <td className="px-6 md:px-10 py-6 md:py-8 text-right min-w-[240px] md:min-w-[320px] whitespace-nowrap">
                   <div className="flex items-center justify-end gap-2 md:gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     {req.status !== RequestStatus.COMPLETED && (
                       <button 
                         onClick={() => setCompletionRequest(req)}
-                        className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 rounded-lg md:rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                        className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 rounded-lg md:rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                         title="Marcar como Concluído e Gerar Coleta"
                       >
                         <i className="fas fa-check text-xs md:text-base"></i>
@@ -752,7 +752,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                     {req.emailDraft && (
                       <button 
                          onClick={() => setPreviewRequest({ req, mode: 'SAP' })}
-                         className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 rounded-lg md:rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                         className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 rounded-lg md:rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                          title="Ver Rascunho SAP"
                       >
                         <i className="fas fa-file-invoice text-xs md:text-base"></i>
@@ -761,7 +761,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                     {req.logisticsDraft && (
                       <button 
                          onClick={() => setPreviewRequest({ req, mode: 'LOGISTICS' })}
-                         className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-lg md:rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                         className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 rounded-lg md:rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
                          title={`Ver E-mail para ${req.method === 'Carrier' ? 'PHL' : 'Correios'}`}
                       >
                         <i className="fas fa-truck-fast text-xs md:text-base"></i>
@@ -769,7 +769,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                     )}
                     <button 
                        onClick={() => handleOpenExcelAndCopy(req)}
-                       className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 rounded-lg md:rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm animate-pulse-subtle"
+                       className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 rounded-lg md:rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm animate-pulse-subtle"
                        title="Copiar Itens NF e Abrir Planilha Excel de Controle de Transportes"
                     >
                       <i className="fas fa-file-excel text-xs md:text-base"></i>
@@ -779,7 +779,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                         setRequestToEditPassword(req);
                         setEditPassword('');
                       }}
-                      className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 rounded-lg md:rounded-xl hover:bg-amber-600 hover:text-white transition-all shadow-sm"
+                      className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 rounded-lg md:rounded-xl hover:bg-amber-600 hover:text-white transition-all shadow-sm"
                       title="Alterar Dados (Editar Solicitação)"
                     >
                       <i className="fas fa-edit text-xs md:text-base"></i>
@@ -789,7 +789,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                         setRequestToDelete(req);
                         setDeletePassword('');
                       }}
-                      className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 rounded-lg md:rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                      className="w-8 h-8 md:w-10 md:h-10 flex shrink-0 items-center justify-center bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800 rounded-lg md:rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                       title="Excluir Solicitação"
                     >
                       <i className="fas fa-trash-can text-xs md:text-base"></i>
@@ -1138,13 +1138,11 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                   type="button"
                   onClick={() => {
                     if (emailRef.current) {
-                      // 1. Remove all pasted img elements or elements with src
+                      // 1. Remove all pasted img elements (standalone, inside inline shapes, base64 images, or with src)
                       const imgs = emailRef.current.querySelectorAll('img, [role="img"], [src]');
                       imgs.forEach(img => {
                         const parent = img.parentElement;
                         img.remove();
-                        
-                        // Parent cleanup
                         if (parent && (parent.tagName === 'P' || parent.tagName === 'DIV' || parent.tagName === 'SPAN')) {
                           if (parent.innerHTML.trim() === '' || parent.innerHTML.trim() === '<br>') {
                             parent.remove();
@@ -1152,13 +1150,49 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                         }
                       });
 
-                      // 2. Remove other picture-like tags
+                      // 2. Remove styles containing inline background-image styles and XML namespaces
+                      const allElements = emailRef.current.querySelectorAll('*');
+                      allElements.forEach(el => {
+                        const tagName = el.tagName.toLowerCase();
+                        // Also check if tag is a custom shape or imagedata drawing
+                        if (
+                          tagName.includes('image') || 
+                          tagName.includes('shape') || 
+                          tagName.includes('imagedata') || 
+                          tagName.includes('rect') || 
+                          tagName === 'picture' || 
+                          tagName === 'svg' || 
+                          tagName === 'canvas' || 
+                          tagName === 'object' || 
+                          tagName === 'embed'
+                        ) {
+                          el.remove();
+                        } else {
+                          const style = el.getAttribute('style');
+                          if (style && /background-image|url\(/i.test(style)) {
+                            el.removeAttribute('style');
+                          }
+                        }
+                      });
+
+                      // 3. Remove other picture-like tags
                       const graphics = emailRef.current.querySelectorAll('picture, svg, canvas, object, embed');
                       graphics.forEach(el => {
                         el.remove();
                       });
 
-                      // 3. Remove any pasted tables from Excel/SharePoint (not our original template tables)
+                      // 4. Also run a robust regex cleanup on the innerHTML for custom Microsoft VML shape tags
+                      let cleanHtml = emailRef.current.innerHTML;
+                      cleanHtml = cleanHtml.replace(/<img[^>]*>/gi, '');
+                      cleanHtml = cleanHtml.replace(/<v:imagedata[^>]*>/gi, '');
+                      cleanHtml = cleanHtml.replace(/<v:shape[^>]*>[\s\S]*?<\/v:shape>/gi, '');
+                      cleanHtml = cleanHtml.replace(/<v:rect[^>]*>[\s\S]*?<\/v:rect>/gi, '');
+                      cleanHtml = cleanHtml.replace(/<v:[^>]*>[\s\S]*?<\/v:[^>]*>/gi, '');
+                      cleanHtml = cleanHtml.replace(/<o:wrap[^>]*>/gi, '');
+                      cleanHtml = cleanHtml.replace(/(style="[^"]*)background-image:[^;"]*;?([^"]*")/gi, '$1$2');
+
+                      // 5. Remove any pasted tables from Excel/SharePoint (not our original template tables)
+                      emailRef.current.innerHTML = cleanHtml;
                       const expectedTableCount = previewRequest.mode === 'LOGISTICS' ? 1 : 2;
                       const tables = emailRef.current.querySelectorAll('table');
                       let originalTablesFound = 0;
@@ -1167,24 +1201,23 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                         if (isOriginal && originalTablesFound < expectedTableCount) {
                           originalTablesFound++;
                         } else {
-                          // Remove any pasted tables, or extra copies of original tables
                           table.remove();
                         }
                       });
 
-                      // 4. Clean up any empty wraps that are left
-                      const emptyWraps = emailRef.current.querySelectorAll('div, p, span');
+                      // 6. Clean up any empty wraps that are left
+                      const emptyWraps = emailRef.current.querySelectorAll('div, p, span, h1, h2, h3, h4, h5, h6');
                       emptyWraps.forEach(el => {
                         if (el.innerHTML.trim() === '' || el.innerHTML.trim() === '<br>') {
                           el.remove();
                         }
                       });
 
-                      // 5. Update react state so the change is persisted across re-renders
-                      const cleanedHtml = emailRef.current.innerHTML;
-                      setDraftHtml(cleanedHtml);
+                      // 7. Update react state so the change is persisted across re-renders
+                      const finalCleanHtml = emailRef.current.innerHTML;
+                      setDraftHtml(finalCleanHtml);
 
-                      // 6. Show toast confirmation
+                      // 8. Show toast confirmation
                       setShowClearToast(true);
                       setTimeout(() => setShowClearToast(false), 3000);
                     }
@@ -1204,22 +1237,22 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                 }}
               />
             </div>
-            <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex flex-wrap justify-end gap-3 transition-colors">
+            <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:justify-end gap-3 transition-colors">
               <button 
                 onClick={openInOutlook}
-                className={`px-4 py-2.5 ${previewRequest.mode === 'LOGISTICS' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-800 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600'} text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-lg`}
+                className={`w-full sm:w-auto px-4 py-2.5 ${previewRequest.mode === 'LOGISTICS' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-800 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600'} text-white rounded-xl text-xs font-extrabold transition-colors flex items-center justify-center gap-2 shadow-lg active:scale-95`}
               >
                 <i className="fas fa-paper-plane"></i> {previewRequest.mode === 'LOGISTICS' ? `Enviar para ${previewRequest.req.method === 'Carrier' ? 'PHL Log' : 'Correios'} (Baixar NF)` : 'Outlook (Novo E-mail)'}
               </button>
               <button 
                 onClick={copyRichHtml}
-                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg"
+                className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-extrabold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-lg active:scale-95"
               >
                 <i className="fas fa-paste"></i> Copiar Formatação (Ctrl+V no Outlook)
               </button>
               <button 
                 onClick={() => setPreviewRequest(null)}
-                className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-extrabold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors active:scale-95"
               >
                 Fechar
               </button>
