@@ -1109,7 +1109,7 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                   </button>
                   <button
                     onClick={() => {
-                      const officeUri = `ms-excel:ofe|u|file:///C:/Users/BR23636/OneDrive%20-%20Cirion%20Technologies/Documentos/NF%20REMESSA%20SOLICITADA/NF%20CORRIGIDA/Nota%20de%20Remessa%20-%20corrigida.xlsx`;
+                      const officeUri = `ms-excel:ofe|u|https://xyzlatam-my.sharepoint.com/personal/gilberto_araujo_ext_ciriontechnologies_com/Documents/Documentos/NF%20REMESSA%20SOLICITADA/NF%20CORRIGIDA/Nota%20de%20Remessa%20-%20corrigida.xlsx`;
                       
                       // Also copy local path to clipboard as a courtesy
                       navigator.clipboard.writeText("C:\\Users\\BR23636\\OneDrive - Cirion Technologies\\Documentos\\NF REMESSA SOLICITADA\\NF CORRIGIDA\\Nota de Remessa - corrigida.xlsx").then(() => {
@@ -1138,86 +1138,51 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                   type="button"
                   onClick={() => {
                     if (emailRef.current) {
-                      // 1. Remove all pasted img elements (standalone, inside inline shapes, base64 images, or with src)
-                      const imgs = emailRef.current.querySelectorAll('img, [role="img"], [src]');
-                      imgs.forEach(img => {
-                        const parent = img.parentElement;
-                        img.remove();
-                        if (parent && (parent.tagName === 'P' || parent.tagName === 'DIV' || parent.tagName === 'SPAN')) {
-                          if (parent.innerHTML.trim() === '' || parent.innerHTML.trim() === '<br>') {
-                            parent.remove();
+                      if (previewRequest.mode === 'LOGISTICS') {
+                        // Logistics mode - Keep the greeting and introductory message
+                        const isCarrier = previewRequest.req.method === 'Carrier';
+                        emailRef.current.innerHTML = `
+                          <div style="font-family: Arial, sans-serif; color: #333; padding: 10px;">
+                            <p>Prezados,</p>
+                            <p>Solicitamos a ${isCarrier ? 'coleta' : 'postagem'} da encomenda conforme dados abaixo:</p>
+                          </div>
+                        `;
+                      } else {
+                        // SAP mode - Reconstruct greeting dynamically (keep existing if customized, otherwise generate)
+                        let greetingText = "Bom dia Tiago,";
+                        const currentHour = new Date().getHours();
+                        const defaultGreeting = currentHour < 12 ? "Bom dia" : "Boa tarde";
+
+                        const currentText = emailRef.current.innerText || "";
+                        if (currentText.includes("Boa tarde Tiago")) {
+                          greetingText = "Boa tarde Tiago,";
+                        } else if (currentText.includes("Boa noite Tiago")) {
+                          greetingText = "Boa noite Tiago,";
+                        } else if (currentText.includes("Bom dia Tiago")) {
+                          greetingText = "Bom dia Tiago,";
+                        } else {
+                          // Check if the user has custom greeting before "Tiago" (e.g. Olá Tiago, Caro Tiago, etc.)
+                          const customMatch = currentText.match(/^([^\n,]+Tiago,?)/i);
+                          if (customMatch && customMatch[1]) {
+                            greetingText = customMatch[1].trim();
+                          } else {
+                            greetingText = `${defaultGreeting} Tiago,`;
                           }
                         }
-                      });
 
-                      // 2. Remove styles containing inline background-image styles and XML namespaces
-                      const allElements = emailRef.current.querySelectorAll('*');
-                      allElements.forEach(el => {
-                        const tagName = el.tagName.toLowerCase();
-                        // Also check if tag is a custom shape or imagedata drawing
-                        if (
-                          tagName.includes('image') || 
-                          tagName.includes('shape') || 
-                          tagName.includes('imagedata') || 
-                          tagName.includes('rect') || 
-                          tagName === 'picture' || 
-                          tagName === 'svg' || 
-                          tagName === 'canvas' || 
-                          tagName === 'object' || 
-                          tagName === 'embed'
-                        ) {
-                          el.remove();
-                        } else {
-                          const style = el.getAttribute('style');
-                          if (style && /background-image|url\(/i.test(style)) {
-                            el.removeAttribute('style');
-                          }
-                        }
-                      });
+                        emailRef.current.innerHTML = `
+                          <div style="font-family: Arial, sans-serif; color: #333; padding: 10px;">
+                            <p>${greetingText}</p>
+                            <p>Segue solicitação de NF Remessa conforme dados abaixo:</p>
+                          </div>
+                        `;
+                      }
 
-                      // 3. Remove other picture-like tags
-                      const graphics = emailRef.current.querySelectorAll('picture, svg, canvas, object, embed');
-                      graphics.forEach(el => {
-                        el.remove();
-                      });
-
-                      // 4. Also run a robust regex cleanup on the innerHTML for custom Microsoft VML shape tags
-                      let cleanHtml = emailRef.current.innerHTML;
-                      cleanHtml = cleanHtml.replace(/<img[^>]*>/gi, '');
-                      cleanHtml = cleanHtml.replace(/<v:imagedata[^>]*>/gi, '');
-                      cleanHtml = cleanHtml.replace(/<v:shape[^>]*>[\s\S]*?<\/v:shape>/gi, '');
-                      cleanHtml = cleanHtml.replace(/<v:rect[^>]*>[\s\S]*?<\/v:rect>/gi, '');
-                      cleanHtml = cleanHtml.replace(/<v:[^>]*>[\s\S]*?<\/v:[^>]*>/gi, '');
-                      cleanHtml = cleanHtml.replace(/<o:wrap[^>]*>/gi, '');
-                      cleanHtml = cleanHtml.replace(/(style="[^"]*)background-image:[^;"]*;?([^"]*")/gi, '$1$2');
-
-                      // 5. Remove any pasted tables from Excel/SharePoint (not our original template tables)
-                      emailRef.current.innerHTML = cleanHtml;
-                      const expectedTableCount = previewRequest.mode === 'LOGISTICS' ? 1 : 2;
-                      const tables = emailRef.current.querySelectorAll('table');
-                      let originalTablesFound = 0;
-                      tables.forEach(table => {
-                        const isOriginal = table.classList.contains('original-template-table');
-                        if (isOriginal && originalTablesFound < expectedTableCount) {
-                          originalTablesFound++;
-                        } else {
-                          table.remove();
-                        }
-                      });
-
-                      // 6. Clean up any empty wraps that are left
-                      const emptyWraps = emailRef.current.querySelectorAll('div, p, span, h1, h2, h3, h4, h5, h6');
-                      emptyWraps.forEach(el => {
-                        if (el.innerHTML.trim() === '' || el.innerHTML.trim() === '<br>') {
-                          el.remove();
-                        }
-                      });
-
-                      // 7. Update react state so the change is persisted across re-renders
+                      // Update react state so the change is persisted across re-renders
                       const finalCleanHtml = emailRef.current.innerHTML;
                       setDraftHtml(finalCleanHtml);
 
-                      // 8. Show toast confirmation
+                      // Show toast confirmation
                       setShowClearToast(true);
                       setTimeout(() => setShowClearToast(false), 3000);
                     }
