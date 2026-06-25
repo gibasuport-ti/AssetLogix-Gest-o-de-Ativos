@@ -14,6 +14,66 @@ interface Props {
   onOpenContributionModal?: () => void;
 }
 
+// Helper to determine flow type (ENVIO / COLETA) and details for custom file naming
+const getRequestFlowAndTarget = (req: TransportRequest) => {
+  const originAttention = (req.originDetails?.attentionTo || '').trim();
+  const destAttention = (req.destinationDetails?.attentionTo || '').trim();
+  
+  const originCity = (req.originDetails?.city || '').trim().toUpperCase();
+  const destCity = (req.destinationDetails?.city || '').trim().toUpperCase();
+
+  const isOriginHub = originAttention.toLowerCase().includes('cirion') || 
+                      originAttention.toLowerCase().includes('exped') ||
+                      originAttention.toLowerCase().includes('ti-') ||
+                      originAttention.toLowerCase().includes('eus') ||
+                      originAttention.toLowerCase().includes('tier') ||
+                      originAttention.toLowerCase().includes('suporte') ||
+                      originAttention.toLowerCase().includes('logistica');
+
+  const isDestHub = destAttention.toLowerCase().includes('cirion') || 
+                    destAttention.toLowerCase().includes('exped') ||
+                    destAttention.toLowerCase().includes('ti-') ||
+                    destAttention.toLowerCase().includes('eus') ||
+                    destAttention.toLowerCase().includes('tier') ||
+                    destAttention.toLowerCase().includes('suporte') ||
+                    destAttention.toLowerCase().includes('logistica');
+
+  let flow: 'ENVIO' | 'COLETA' = 'ENVIO';
+  let personName = destAttention;
+  let city = destCity;
+
+  if (isOriginHub && !isDestHub) {
+    flow = 'ENVIO';
+    personName = destAttention;
+    city = destCity;
+  } else if (!isOriginHub && isDestHub) {
+    flow = 'COLETA';
+    personName = originAttention;
+    city = originCity;
+  } else {
+    // Fallback if we cannot distinguish: prefer destination if it has a person, or default to destination
+    if (originAttention && (!destAttention || destAttention === 'Cirion Technologies')) {
+      flow = 'COLETA';
+      personName = originAttention;
+      city = originCity;
+    } else {
+      flow = 'ENVIO';
+      personName = destAttention || 'Nota';
+      city = destCity || 'BR';
+    }
+  }
+
+  // Clean person name if it has A/C pattern
+  personName = personName.replace(/^(A\/C de:|A\/C:|AC de:|AC:)/i, '').trim();
+  
+  // Default fallback name
+  if (!personName || personName.toLowerCase() === 'cirion technologies') {
+    personName = 'Colaborador';
+  }
+
+  return { flow, personName, city };
+};
+
 const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, userRole, hasContributed, onOpenContributionModal }) => {
   const [filter, setFilter] = useState<RequestStatus | 'ALL'>('ALL');
   const [previewRequest, setPreviewRequest] = useState<{ req: TransportRequest, mode: 'SAP' | 'LOGISTICS' } | null>(null);
@@ -282,8 +342,8 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
       cleanField(destino),
       cleanField(remetente),
       cleanField(destinatario),
-      cleanField(descricaoItens),
       cleanField(numeroNf),
+      cleanField(descricaoItens),
       cleanField(volume),
       cleanField(solicitacaoNfData),
       cleanField(solicitacaoTransporteData),
@@ -1073,60 +1133,162 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
                 </div>
             )}
 
-            {previewRequest.mode === 'SAP' && (
-              <div className="mx-6 mt-4 p-4 md:p-5 bg-emerald-50/55 dark:bg-emerald-950/10 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl flex flex-col md:flex-row items-start md:items-center gap-4 transition-all">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <i className="fas fa-file-excel text-lg text-emerald-600 dark:text-emerald-400 animate-bounce"></i>
-                </div>
-                <div className="flex-1 min-w-0 font-sans">
-                  <h4 className="text-[11px] font-black uppercase text-emerald-800 dark:text-emerald-400 tracking-wider flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                    Planilha Excel OneDrive (Caminho Corporativo)
-                  </h4>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300 font-mono mt-1 select-all break-all bg-emerald-100/30 dark:bg-emerald-950/40 px-2 py-1 rounded">
-                    C:\Users\BR23636\OneDrive - Cirion Technologies\Documentos\NF REMESSA SOLICITADA\NF CORRIGIDA\Nota de Remessa - corrigida.xlsx
-                  </p>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5 leading-relaxed font-sans">
-                    Instrução: Ao clicar em <strong>Abrir Planilha</strong>, o arquivo será aberto diretamente no <strong>Microsoft Excel</strong> local do seu computador e o caminho será copiado! Após editar, salve a planilha, copie seus dados e dê um <strong>Ctrl+V</strong> na área de rascunho interativa logo abaixo.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0 mt-3 md:mt-0">
-                  <button
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText("C:\\Users\\BR23636\\OneDrive - Cirion Technologies\\Documentos\\NF REMESSA SOLICITADA\\NF CORRIGIDA\\Nota de Remessa - corrigida.xlsx");
-                        setShowLocalExcelToast(true);
-                        setTimeout(() => setShowLocalExcelToast(false), 3000);
-                      } catch (err) {
-                        console.error(err);
-                      }
-                    }}
-                    type="button"
-                    className="flex-1 md:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase rounded-xl transition-all flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700"
-                    title="Copiar caminho de arquivo local"
-                  >
-                    <i className="fas fa-copy"></i> Copiar Caminho
-                  </button>
-                  <button
-                    onClick={() => {
-                      const officeUri = `ms-excel:ofe|u|https://xyzlatam-my.sharepoint.com/personal/gilberto_araujo_ext_ciriontechnologies_com/Documents/Documentos/NF%20REMESSA%20SOLICITADA/NF%20CORRIGIDA/Nota%20de%20Remessa%20-%20corrigida.xlsx`;
-                      
-                      // Also copy local path to clipboard as a courtesy
-                      navigator.clipboard.writeText("C:\\Users\\BR23636\\OneDrive - Cirion Technologies\\Documentos\\NF REMESSA SOLICITADA\\NF CORRIGIDA\\Nota de Remessa - corrigida.xlsx").then(() => {
-                        setShowLocalExcelToast(true);
-                        setTimeout(() => setShowLocalExcelToast(false), 3000);
-                      }).catch(console.error);
+            {previewRequest.mode === 'SAP' && (() => {
+              const { flow, personName, city } = getRequestFlowAndTarget(previewRequest.req);
+              const customFileName = `${personName}-Nota de Remessa-${flow}-${city}.xlsx`;
+              const customLocalPath = `C:\\Users\\BR23636\\OneDrive - Cirion Technologies\\Documentos\\NF REMESSA SOLICITADA\\NF CORRIGIDA\\Nota de Remessa - corrigida.xlsx`;
+              const customOfficeUri = "ms-excel:ofe|u|https://xyzlatam-my.sharepoint.com/personal/gilberto_araujo_ext_ciriontechnologies_com/Documents/Documentos/NF%20REMESSA%20SOLICITADA/NF%20CORRIGIDA/Nota%20de%20Remessa%20-%20corrigida.xlsx";
+              
+              const handleDirectDownloadCSV = () => {
+                const headers = [
+                  "Status Geral", "Origem", "Destino", "Remetente", "Destinatário", 
+                  "Número NF", "Descrição de Itens", "Volume", "Data Solicitação NF", 
+                  "Data Solicitação Transporte", "Data Conclusão", "Observações"
+                ];
+                
+                const formatDateSimple = (ts?: number) => {
+                  if (!ts) return '';
+                  const d = new Date(ts);
+                  const day = String(d.getDate()).padStart(2, '0');
+                  const month = String(d.getMonth() + 1).padStart(2, '0');
+                  const year = d.getFullYear();
+                  return `${day}/${month}/${year}`;
+                };
 
-                      window.location.href = officeUri;
-                    }}
-                    type="button"
-                    className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold uppercase rounded-xl transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 active:scale-95"
-                  >
-                    <i className="fas fa-file-excel text-xs"></i> Abrir Planilha
-                  </button>
+                const req = previewRequest.req;
+                const statusGeral = req.logisticsStatus || req.status;
+                const origem = req.originDetails?.city || '';
+                const destino = req.destinationDetails?.city || '';
+                const remetente = req.originDetails?.attentionTo || 'Cirion Technologies';
+                const destinatario = req.destinationDetails?.attentionTo || 'Cirion Technologies';
+
+                let descricaoItens = '';
+                if (req.requestAssets && req.requestAssets.length > 0) {
+                  descricaoItens = req.requestAssets.map(item => {
+                    const asset = assets.find(a => a.id === item.assetId);
+                    return `${item.quantity || 1}x ${asset ? asset.name : 'Equipamento'}`;
+                  }).join(', ');
+                } else if (req.assetIds && req.assetIds.length > 0) {
+                  const counts: { [key: string]: number } = {};
+                  req.assetIds.forEach(id => {
+                    const asset = assets.find(a => a.id === id);
+                    const name = asset ? asset.name : 'Equipamento';
+                    counts[name] = (counts[name] || 0) + 1;
+                  });
+                  descricaoItens = Object.entries(counts).map(([name, count]) => `${count}x ${name}`).join(', ');
+                }
+
+                const numeroNf = req.invoiceNumber || '';
+                const volume = req.totalVolume || 1;
+                const isNfRequest = String(req.type || '').toUpperCase().includes('NF');
+                const isTransportRequest = String(req.type || '').toUpperCase().includes('TRANSPORTE') || !isNfRequest;
+                const systemCurrentDateStr = formatDateSimple(Date.now());
+                const solicitacaoNfData = isNfRequest ? systemCurrentDateStr : '';
+                const solicitacaoTransporteData = isTransportRequest ? systemCurrentDateStr : '';
+                const conclusaoData = req.status === RequestStatus.COMPLETED && req.deliveryDate ? formatDateSimple(req.deliveryDate) : '';
+
+                const obsParts = [];
+                if (req.method) obsParts.push(`Método: ${req.method === 'Carrier' ? 'Transportadora' : 'Correios'}`);
+                if (req.totalWeight) obsParts.push(`Peso: ${req.totalWeight}`);
+                if (req.trackingNumber) obsParts.push(`Rastreio: ${req.trackingNumber}`);
+                if (req.id) obsParts.push(`Protocolo App: ${req.id}`);
+                const observacoes = obsParts.join(' | ');
+
+                const escapeCSV = (val: any) => {
+                  let s = val === undefined || val === null ? "" : String(val);
+                  s = s.replace(/"/g, '""');
+                  if (s.includes(';') || s.includes('\n') || s.includes('\r') || s.includes('"')) {
+                    return `"${s}"`;
+                  }
+                  return s;
+                };
+
+                const rowValues = [
+                  statusGeral, origem, destino, remetente, destinatario,
+                  numeroNf, descricaoItens, volume, solicitacaoNfData,
+                  solicitacaoTransporteData, conclusaoData, observacoes
+                ];
+
+                const csvContent = "\uFEFF" + [
+                  headers.map(escapeCSV).join(";"),
+                  rowValues.map(escapeCSV).join(";")
+                ].join("\r\n");
+
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", customFileName);
+                link.style.visibility = "hidden";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              };
+
+              return (
+                <div className="mx-6 mt-4 p-4 md:p-5 bg-emerald-50/55 dark:bg-emerald-950/10 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl flex flex-col xl:flex-row items-start xl:items-center gap-4 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <i className="fas fa-file-excel text-lg text-emerald-600 dark:text-emerald-400 animate-bounce"></i>
+                  </div>
+                  <div className="flex-1 min-w-0 font-sans">
+                    <h4 className="text-[11px] font-black uppercase text-emerald-800 dark:text-emerald-400 tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                      Planilha Excel OneDrive ({flow} - {city})
+                    </h4>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300 font-mono mt-1 select-all break-all bg-emerald-100/30 dark:bg-emerald-950/40 px-2 py-1 rounded font-bold">
+                      {customLocalPath}
+                    </p>
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5 leading-relaxed font-sans">
+                      Nome identificador: <strong className="text-emerald-800 dark:text-emerald-300">{personName}</strong> | Fluxo: <strong>{flow}</strong>
+                      <br />
+                      Dica: Clique em <strong>Baixar Arquivo</strong> para obter a planilha nomeada sem avisos de segurança, ou use <strong>Abrir Planilha</strong> para carregar via OneDrive.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full xl:w-auto shrink-0 mt-3 xl:mt-0">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(customLocalPath);
+                          setShowLocalExcelToast(true);
+                          setTimeout(() => setShowLocalExcelToast(false), 3000);
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      type="button"
+                      className="flex-1 md:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase rounded-xl transition-all flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700"
+                      title="Copiar caminho de arquivo local"
+                    >
+                      <i className="fas fa-copy"></i> Copiar Caminho
+                    </button>
+                    <button
+                      onClick={handleDirectDownloadCSV}
+                      type="button"
+                      className="flex-1 md:flex-none px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 active:scale-95"
+                      title="Baixar planilha renomeada e preenchida diretamente"
+                    >
+                      <i className="fas fa-download"></i> Baixar Arquivo
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(customLocalPath);
+                          setShowLocalExcelToast(true);
+                          setTimeout(() => setShowLocalExcelToast(false), 3000);
+                        } catch (err) {
+                          console.error(err);
+                        }
+                        window.location.href = customOfficeUri;
+                      }}
+                      type="button"
+                      className="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold uppercase rounded-xl transition-all flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 active:scale-95"
+                    >
+                      <i className="fas fa-file-excel text-xs"></i> Abrir Planilha
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <div className="p-6 overflow-y-auto flex-1 bg-slate-100/30 dark:bg-slate-950/30 flex flex-col gap-2">
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-sans">
