@@ -335,15 +335,15 @@ const RequestList: React.FC<Props> = ({ requests, assets, onUpdate, onDelete, us
     if (req.id) obsParts.push(`Protocolo App: ${req.id}`);
     const observacoes = obsParts.join(' | ');
 
-    // Montando a linha com colunas tabuladas prontas para colar na planilha Excel
+    // Montando a linha com colunas tabuladas prontas para colar na planilha Excel com a ordem correta
     const tsvLine = [
       cleanField(statusGeral),
       cleanField(origem),
       cleanField(destino),
       cleanField(remetente),
       cleanField(destinatario),
-      cleanField(numeroNf),
-      cleanField(descricaoItens),
+      cleanField(descricaoItens), // Coluna 6: Descrição de Itens
+      cleanField(numeroNf),       // Coluna 7: Número NF
       cleanField(volume),
       cleanField(solicitacaoNfData),
       cleanField(solicitacaoTransporteData),
